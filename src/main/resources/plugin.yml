@@ -1,0 +1,5 @@
+name: Spleef
+version: '${version}'
+main: net.luconia.spleef.Spleef
+authors: [ LuconiaProductions ]
+description: Spleef plugin for Luconia.net

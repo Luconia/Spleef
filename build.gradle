@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+}
+
+group = 'net.luconia'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven { url 'https://repo.cloudnetservice.eu/repository/releases/' }
+}
+
+configurations {
+    extraLibs
+}
+
+dependencies {
+    compileJava.options.encoding = 'UTF-8'
+    compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+
+    extraLibs 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    implementation 'de.dytanic.cloudnet:cloudnet-driver:3.4.0-RELEASE'
+    implementation 'de.dytanic.cloudnet:cloudnet-wrapper-jvm:3.4.0-RELEASE'
+    implementation 'de.dytanic.cloudnet:cloudnet-bridge:3.4.0-RELEASE'
+    implementation 'de.dytanic.cloudnet:cloudnet-cloudperms:3.4.0-RELEASE'
+
+    extraLibs 'de.dytanic.cloudnet:cloudnet-syncproxy:3.4.0-RELEASE'
+
+    configurations.implementation.extendsFrom(configurations.extraLibs)
+}
+
+def targetJavaVersion = 8
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
