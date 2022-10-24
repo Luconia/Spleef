@@ -5,3 +5,7 @@ Spleef is one of the oldest minecraft minigames
 - Map reset
 - Arena System
 - ItemBuilder
+- SimpleCloud support
+- Json config system
+- Stats
+- Scoreboard
